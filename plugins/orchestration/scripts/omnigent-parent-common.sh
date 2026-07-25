@@ -2,24 +2,24 @@
 
 set -euo pipefail
 
-OZ_PARENT_HOOK_INPUT=""
-OZ_PARENT_STATE_DIR=""
-OZ_PARENT_RENDERED_CONTEXT=""
-OZ_PARENT_REMAINING_COUNT=0
-OZ_PARENT_SURFACED_IDS=()
+OMNIGENT_PARENT_HOOK_INPUT=""
+OMNIGENT_PARENT_STATE_DIR=""
+OMNIGENT_PARENT_RENDERED_CONTEXT=""
+OMNIGENT_PARENT_REMAINING_COUNT=0
+OMNIGENT_PARENT_SURFACED_IDS=()
 
 read_hook_input() {
     cat
 }
 
 # Only child Codex runs have a lead-agent parent to bridge messages from.
-# When OZ_PARENT_RUN_ID is absent, leave the hooks inert so they do not affect
-# regular Oz harness sessions that are not running as child agents.
-oz_harness_available() {
-    [ -n "${OZ_CLI:-}" ] &&
-        [ -n "${OZ_RUN_ID:-}" ] &&
-        [ -n "${OZ_PARENT_RUN_ID:-}" ] &&
-        command -v "$OZ_CLI" >/dev/null 2>&1
+# When OMNIGENT_PARENT_RUN_ID is absent, leave the hooks inert so they do not affect
+# regular Omnigent harness sessions that are not running as child agents.
+omnigent_harness_available() {
+    [ -n "${OMNIGENT_CLI:-}" ] &&
+        [ -n "${OMNIGENT_RUN_ID:-}" ] &&
+        [ -n "${OMNIGENT_PARENT_RUN_ID:-}" ] &&
+        command -v "$OMNIGENT_CLI" >/dev/null 2>&1
 }
 
 json_field() {
@@ -39,7 +39,7 @@ session_id_from_input() {
 }
 
 state_root() {
-    printf '%s\n' "${OZ_PARENT_STATE_ROOT:-$HOME/.codex/oz-parent-bridge}"
+    printf '%s\n' "${OMNIGENT_PARENT_STATE_ROOT:-$HOME/.codex/omnigent-parent-bridge}"
 }
 
 state_dir_from_session_id() {
@@ -149,7 +149,7 @@ wait_for_driver_hook_output() {
 
 emit_driver_hook_additional_context() {
     local hook_event="$1"
-    local state_dir="${2:-$OZ_PARENT_STATE_DIR}"
+    local state_dir="${2:-$OMNIGENT_PARENT_STATE_DIR}"
     local output_file additional_context
 
     wait_for_driver_hook_output "$state_dir" || return 1
@@ -160,7 +160,7 @@ emit_driver_hook_additional_context() {
 }
 
 acknowledge_driver_hook_output() {
-    local state_dir="${1:-$OZ_PARENT_STATE_DIR}"
+    local state_dir="${1:-$OMNIGENT_PARENT_STATE_DIR}"
     : >"$(hook_output_ack_file "$state_dir")"
 }
 
@@ -218,33 +218,33 @@ ensure_last_sequence_file() {
 # Set by the Kyon driver when it owns the parent-bridge listener and surfaces
 # hook output itself. In that mode shell hooks reuse driver state.
 listener_lifecycle_managed_externally() {
-    [ "${OZ_PARENT_LISTENER_MANAGED_EXTERNALLY:-0}" = "1" ]
+    [ "${OMNIGENT_PARENT_LISTENER_MANAGED_EXTERNALLY:-0}" = "1" ]
 }
 
 resolve_hook_state() {
-    OZ_PARENT_HOOK_INPUT="$(read_hook_input)"
-    oz_harness_available || return 1
+    OMNIGENT_PARENT_HOOK_INPUT="$(read_hook_input)"
+    omnigent_harness_available || return 1
 
-    OZ_PARENT_STATE_DIR="$(state_dir_from_input "$OZ_PARENT_HOOK_INPUT" || true)"
-    [ -n "$OZ_PARENT_STATE_DIR" ] || return 1
+    OMNIGENT_PARENT_STATE_DIR="$(state_dir_from_input "$OMNIGENT_PARENT_HOOK_INPUT" || true)"
+    [ -n "$OMNIGENT_PARENT_STATE_DIR" ] || return 1
 }
 
 load_hook_state() {
     resolve_hook_state || return 1
     if listener_lifecycle_managed_externally; then
-        [ -d "$OZ_PARENT_STATE_DIR" ] || return 1
+        [ -d "$OMNIGENT_PARENT_STATE_DIR" ] || return 1
     else
-        ensure_state_dir "$OZ_PARENT_STATE_DIR"
+        ensure_state_dir "$OMNIGENT_PARENT_STATE_DIR"
     fi
 }
 
 hook_state_dir() {
-    printf '%s\n' "$OZ_PARENT_STATE_DIR"
+    printf '%s\n' "$OMNIGENT_PARENT_STATE_DIR"
 }
 
 start_listener_if_needed() {
     local listener_script="$1"
-    local state_dir="${2:-$OZ_PARENT_STATE_DIR}"
+    local state_dir="${2:-$OMNIGENT_PARENT_STATE_DIR}"
 
     listener_running "$state_dir" && return 0
 
@@ -256,7 +256,7 @@ start_listener_if_needed() {
 }
 
 cleanup_hook_state() {
-    local state_dir="${1:-$OZ_PARENT_STATE_DIR}"
+    local state_dir="${1:-$OMNIGENT_PARENT_STATE_DIR}"
     kill_listener "$state_dir"
     rm -rf "$state_dir"
 }
@@ -265,7 +265,7 @@ cleanup_hook_state() {
 # short window so late-arriving parent work still blocks completion instead of
 # letting the child exit too early.
 stop_linger_attempts() {
-    local attempts="${OZ_PARENT_STOP_LINGER_ATTEMPTS:-240}"
+    local attempts="${OMNIGENT_PARENT_STOP_LINGER_ATTEMPTS:-240}"
     if ! [[ "$attempts" =~ ^[0-9]+$ ]]; then
         attempts=240
     fi
@@ -273,7 +273,7 @@ stop_linger_attempts() {
 }
 
 stop_linger_poll_seconds() {
-    local poll_seconds="${OZ_PARENT_STOP_LINGER_POLL_SECONDS:-0.25}"
+    local poll_seconds="${OMNIGENT_PARENT_STOP_LINGER_POLL_SECONDS:-0.25}"
     if ! [[ "$poll_seconds" =~ ^([0-9]+([.][0-9]+)?|[.][0-9]+)$ ]]; then
         poll_seconds="0.25"
     fi
@@ -302,20 +302,20 @@ wait_for_pending_parent_messages() {
 }
 
 emit_stop_block_if_pending() {
-    local state_dir="${1:-$OZ_PARENT_STATE_DIR}"
+    local state_dir="${1:-$OMNIGENT_PARENT_STATE_DIR}"
     local pending_count reason
 
     pending_count="$(wait_for_pending_parent_messages "$state_dir")" || return 1
     [ "$pending_count" -gt 0 ] || return 1
 
-    reason="There are ${pending_count} pending parent message(s) from the lead Oz run. Continue so the next safe boundary can surface them."
+    reason="There are ${pending_count} pending parent message(s) from the lead Omnigent run. Continue so the next safe boundary can surface them."
     jq -nc --arg reason "$reason" '{decision:"block", reason:$reason}'
 }
 
 mark_message_delivered() {
     local message_id="$1"
-    "$OZ_CLI" run message mark-delivered "$message_id" >/dev/null 2>&1 || \
-        "$OZ_CLI" run message delivered "$message_id" >/dev/null 2>&1 || \
+    "$OMNIGENT_CLI" run message mark-delivered "$message_id" >/dev/null 2>&1 || \
+        "$OMNIGENT_CLI" run message delivered "$message_id" >/dev/null 2>&1 || \
         true
 }
 
@@ -332,9 +332,9 @@ build_parent_context_from_staged_messages() {
     local message_id sender_run_id subject body sequence
     local block separator candidate remaining note
 
-    OZ_PARENT_RENDERED_CONTEXT=$'Lead-agent updates arrived from Oz. Treat the latest parent instructions below as authoritative.\n'
-    OZ_PARENT_REMAINING_COUNT=0
-    OZ_PARENT_SURFACED_IDS=()
+    OMNIGENT_PARENT_RENDERED_CONTEXT=$'Lead-agent updates arrived from Omnigent. Treat the latest parent instructions below as authoritative.\n'
+    OMNIGENT_PARENT_REMAINING_COUNT=0
+    OMNIGENT_PARENT_SURFACED_IDS=()
 
     while IFS= read -r staged_file; do
         [ -n "$staged_file" ] || continue
@@ -359,34 +359,34 @@ build_parent_context_from_staged_messages() {
         block="$block"$'\n'"Subject: $subject"$'\n\n'"$body"
 
         separator=""
-        if [ "${#OZ_PARENT_SURFACED_IDS[@]}" -gt 0 ]; then
+        if [ "${#OMNIGENT_PARENT_SURFACED_IDS[@]}" -gt 0 ]; then
             separator=$'\n\n'
         fi
 
-        candidate="${OZ_PARENT_RENDERED_CONTEXT}${separator}${block}"
+        candidate="${OMNIGENT_PARENT_RENDERED_CONTEXT}${separator}${block}"
         if [ "${#candidate}" -gt "$max_context_chars" ]; then
-            remaining=$((max_context_chars - ${#OZ_PARENT_RENDERED_CONTEXT} - ${#separator}))
-            if [ "$remaining" -le 3 ] && [ "${#OZ_PARENT_SURFACED_IDS[@]}" -gt 0 ]; then
+            remaining=$((max_context_chars - ${#OMNIGENT_PARENT_RENDERED_CONTEXT} - ${#separator}))
+            if [ "$remaining" -le 3 ] && [ "${#OMNIGENT_PARENT_SURFACED_IDS[@]}" -gt 0 ]; then
                 break
             fi
             if [ "$remaining" -gt 3 ] && [ "${#block}" -gt "$remaining" ]; then
                 block="${block:0:$((remaining - 3))}..."
-            elif [ "${#OZ_PARENT_SURFACED_IDS[@]}" -gt 0 ]; then
+            elif [ "${#OMNIGENT_PARENT_SURFACED_IDS[@]}" -gt 0 ]; then
                 break
             fi
         fi
 
-        OZ_PARENT_RENDERED_CONTEXT="${OZ_PARENT_RENDERED_CONTEXT}${separator}${block}"
-        OZ_PARENT_SURFACED_IDS+=("$message_id")
+        OMNIGENT_PARENT_RENDERED_CONTEXT="${OMNIGENT_PARENT_RENDERED_CONTEXT}${separator}${block}"
+        OMNIGENT_PARENT_SURFACED_IDS+=("$message_id")
     done < <(sorted_staged_messages "$state_dir")
 
-    [ "${#OZ_PARENT_SURFACED_IDS[@]}" -gt 0 ] || return 1
+    [ "${#OMNIGENT_PARENT_SURFACED_IDS[@]}" -gt 0 ] || return 1
 
-    OZ_PARENT_REMAINING_COUNT=$((total_staged - ${#OZ_PARENT_SURFACED_IDS[@]}))
-    if [ "$OZ_PARENT_REMAINING_COUNT" -gt 0 ]; then
+    OMNIGENT_PARENT_REMAINING_COUNT=$((total_staged - ${#OMNIGENT_PARENT_SURFACED_IDS[@]}))
+    if [ "$OMNIGENT_PARENT_REMAINING_COUNT" -gt 0 ]; then
         note=$'\n\nMore parent messages are still staged and will be surfaced on a later turn.'
-        if [ $(( ${#OZ_PARENT_RENDERED_CONTEXT} + ${#note} )) -le "$max_context_chars" ]; then
-            OZ_PARENT_RENDERED_CONTEXT="${OZ_PARENT_RENDERED_CONTEXT}${note}"
+        if [ $(( ${#OMNIGENT_PARENT_RENDERED_CONTEXT} + ${#note} )) -le "$max_context_chars" ]; then
+            OMNIGENT_PARENT_RENDERED_CONTEXT="${OMNIGENT_PARENT_RENDERED_CONTEXT}${note}"
         fi
     fi
 }
@@ -404,7 +404,7 @@ deliver_and_remove_staged_messages() {
 
 emit_hook_additional_context() {
     local hook_event="$1"
-    local additional_context="${2:-$OZ_PARENT_RENDERED_CONTEXT}"
+    local additional_context="${2:-$OMNIGENT_PARENT_RENDERED_CONTEXT}"
 
     jq -nc \
         --arg event "$hook_event" \
