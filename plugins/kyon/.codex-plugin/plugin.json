@@ -1,0 +1,10 @@
+{
+  "name": "kyon",
+  "description": "Kyon terminal integration for Codex - native notifications, and more to come",
+  "version": "0.4.0",
+  "author": {
+    "name": "Kyon",
+    "url": "https://kyon.sh"
+  },
+  "homepage": "https://github.com/kyon-sh/codex-kyon"
+}

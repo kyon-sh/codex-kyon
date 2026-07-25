@@ -1,6 +1,6 @@
 #!/bin/bash
 # Hook script for Codex PermissionRequest event.
-# Sends a structured Warp notification when Codex needs permission to run a tool.
+# Sends a structured Kyon notification when Codex needs permission to run a tool.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/should-use-structured.sh"
@@ -32,4 +32,4 @@ BODY=$(build_payload "$INPUT" "permission_request" \
     --arg tool_name "$TOOL_NAME" \
     --argjson tool_input "$TOOL_INPUT")
 
-"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
+"$SCRIPT_DIR/kyon-notify.sh" "kyon://cli-agent" "$BODY"

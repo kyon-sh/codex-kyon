@@ -1,6 +1,6 @@
 #!/bin/bash
 # Hook script for Codex Stop event.
-# Sends a structured Warp notification when Codex finishes a turn.
+# Sends a structured Kyon notification when Codex finishes a turn.
 
 set -euo pipefail
 
@@ -26,4 +26,4 @@ BODY=$(build_payload "$INPUT" "stop" \
     --arg response "$RESPONSE" \
     --arg transcript_path "$TRANSCRIPT_PATH")
 
-"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
+"$SCRIPT_DIR/kyon-notify.sh" "kyon://cli-agent" "$BODY"

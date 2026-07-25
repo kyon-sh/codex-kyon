@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds a structured JSON notification payload for warp://cli-agent.
+# Builds a structured JSON notification payload for kyon://cli-agent.
 #
 # Usage: source this file, then call build_payload with event-specific fields.
 #
@@ -15,12 +15,12 @@
 # The current protocol version this plugin knows how to produce.
 PLUGIN_CURRENT_PROTOCOL_VERSION=1
 
-# Negotiate the protocol version with Warp.
-# Uses min(plugin_current, warp_declared), falling back to 1 if Warp doesn't advertise a version.
+# Negotiate the protocol version with Kyon.
+# Uses min(plugin_current, kyon_declared), falling back to 1 if Kyon doesn't advertise a version.
 negotiate_protocol_version() {
-    local warp_version="${WARP_CLI_AGENT_PROTOCOL_VERSION:-1}"
-    if [ "$warp_version" -lt "$PLUGIN_CURRENT_PROTOCOL_VERSION" ] 2>/dev/null; then
-        echo "$warp_version"
+    local kyon_version="${KYON_CLI_AGENT_PROTOCOL_VERSION:-1}"
+    if [ "$kyon_version" -lt "$PLUGIN_CURRENT_PROTOCOL_VERSION" ] 2>/dev/null; then
+        echo "$kyon_version"
     else
         echo "$PLUGIN_CURRENT_PROTOCOL_VERSION"
     fi

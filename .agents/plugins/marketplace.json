@@ -1,26 +1,26 @@
 {
-  "name": "codex-warp",
-  "description": "Official Warp terminal integrations for Codex",
+  "name": "codex-kyon",
+  "description": "Official Kyon terminal integrations for Codex",
   "owner": {
-    "name": "Warp",
-    "url": "https://warp.dev"
+    "name": "Kyon",
+    "url": "https://kyon.sh"
   },
   "plugins": [
     {
-      "name": "warp",
-      "description": "Native Warp notifications when Codex completes tasks or needs input",
-      "source": "./plugins/warp",
+      "name": "kyon",
+      "description": "Native Kyon notifications when Codex completes tasks or needs input",
+      "source": "./plugins/kyon",
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "version": "0.4.0",
       "category": "productivity",
-      "tags": ["notifications", "terminal", "warp"]
+      "tags": ["notifications", "terminal", "kyon"]
     },
     {
       "name": "orchestration",
-      "description": "Warp integration for Codex in Oz cloud agent environments, including parent-message delivery hooks and skills",
+      "description": "Kyon integration for Codex in Oz cloud agent environments, including parent-message delivery hooks and skills",
       "source": "./plugins/orchestration",
       "policy": {
         "installation": "AVAILABLE",
@@ -28,7 +28,7 @@
       },
       "version": "0.4.0",
       "category": "productivity",
-      "tags": ["terminal", "warp", "oz"]
+      "tags": ["terminal", "kyon", "oz"]
     }
   ]
 }

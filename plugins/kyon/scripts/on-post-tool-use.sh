@@ -1,6 +1,6 @@
 #!/bin/bash
 # Hook script for Codex PostToolUse event.
-# Sends a structured Warp notification after a tool call completes.
+# Sends a structured Kyon notification after a tool call completes.
 
 set -euo pipefail
 
@@ -19,4 +19,4 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 BODY=$(build_payload "$INPUT" "tool_complete" \
     --arg tool_name "$TOOL_NAME")
 
-"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
+"$SCRIPT_DIR/kyon-notify.sh" "kyon://cli-agent" "$BODY"

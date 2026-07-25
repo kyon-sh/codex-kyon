@@ -220,17 +220,17 @@ export OZ_PARENT_RUN_ID="parent-run-456"
 echo ""
 echo "=== plugin manifests ==="
 assert_file_exists "marketplace manifest exists" "$REPO_ROOT/.agents/plugins/marketplace.json"
-assert_file_exists "warp plugin manifest exists" "$REPO_ROOT/plugins/warp/.codex-plugin/plugin.json"
+assert_file_exists "kyon plugin manifest exists" "$REPO_ROOT/plugins/kyon/.codex-plugin/plugin.json"
 assert_file_exists "oz plugin manifest exists" "$REPO_ROOT/plugins/orchestration/.codex-plugin/plugin.json"
-assert_file_exists "warp hook config exists" "$REPO_ROOT/plugins/warp/hooks/hooks.json"
+assert_file_exists "kyon hook config exists" "$REPO_ROOT/plugins/kyon/hooks/hooks.json"
 assert_file_exists "oz hook config exists" "$REPO_ROOT/plugins/orchestration/hooks/hooks.json"
 assert_file_exists "github workflow exists" "$REPO_ROOT/.github/workflows/test.yml"
-assert_json_field "marketplace name" "$(cat "$REPO_ROOT/.agents/plugins/marketplace.json")" ".name" "codex-warp"
-assert_json_field "warp plugin name" "$(cat "$REPO_ROOT/plugins/warp/.codex-plugin/plugin.json")" ".name" "warp"
+assert_json_field "marketplace name" "$(cat "$REPO_ROOT/.agents/plugins/marketplace.json")" ".name" "codex-kyon"
+assert_json_field "kyon plugin name" "$(cat "$REPO_ROOT/plugins/kyon/.codex-plugin/plugin.json")" ".name" "kyon"
 assert_json_field "oz plugin name" "$(cat "$REPO_ROOT/plugins/orchestration/.codex-plugin/plugin.json")" ".name" "orchestration"
-assert_contains "warp hooks use PLUGIN_ROOT" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-session-start.sh'
-assert_contains "warp hooks include prompt submit" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-prompt-submit.sh'
-assert_contains "warp hooks include post tool use" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-post-tool-use.sh'
+assert_contains "kyon hooks use PLUGIN_ROOT" "$(cat "$REPO_ROOT/plugins/kyon/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-session-start.sh'
+assert_contains "kyon hooks include prompt submit" "$(cat "$REPO_ROOT/plugins/kyon/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-prompt-submit.sh'
+assert_contains "kyon hooks include post tool use" "$(cat "$REPO_ROOT/plugins/kyon/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-post-tool-use.sh'
 assert_contains "oz hooks use PLUGIN_ROOT" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/drain-mailbox.sh UserPromptSubmit'
 assert_contains "oz hooks include session end" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-session-end.sh'
 

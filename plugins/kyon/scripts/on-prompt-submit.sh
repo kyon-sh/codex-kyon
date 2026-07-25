@@ -1,6 +1,6 @@
 #!/bin/bash
 # Hook script for Codex UserPromptSubmit event.
-# Sends a structured Warp notification when the user submits a prompt.
+# Sends a structured Kyon notification when the user submits a prompt.
 
 set -euo pipefail
 
@@ -23,4 +23,4 @@ fi
 BODY=$(build_payload "$INPUT" "prompt_submit" \
     --arg query "$QUERY")
 
-"$SCRIPT_DIR/warp-notify.sh" "warp://cli-agent" "$BODY"
+"$SCRIPT_DIR/kyon-notify.sh" "kyon://cli-agent" "$BODY"

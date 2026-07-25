@@ -1,10 +1,10 @@
 {
   "name": "orchestration",
-  "description": "Warp integration for Codex in Oz cloud agent environments, including parent-message delivery hooks and skills",
+  "description": "Kyon integration for Codex in Oz cloud agent environments, including parent-message delivery hooks and skills",
   "version": "0.4.0",
   "author": {
-    "name": "Warp",
-    "url": "https://warp.dev"
+    "name": "Kyon",
+    "url": "https://kyon.sh"
   },
-  "homepage": "https://github.com/warpdotdev/codex-warp"
+  "homepage": "https://github.com/kyon-sh/codex-kyon"
 }
